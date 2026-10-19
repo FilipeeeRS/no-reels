@@ -1,0 +1,5 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">No Reels</string>
+    <string name="service_description">Esconde Reels e Pesquisa da barra inferior do Instagram. Lê apenas a tela do Instagram para redesenhar a barra; nada é enviado para fora do aparelho.</string>
+</resources>

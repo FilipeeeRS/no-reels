@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Câmera do Instagram com um sinal de proibido por cima. Tudo dentro da zona segura (raio 33). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:pathData="M46,36h16a10,10 0,0 1,10 10v16a10,10 0,0 1,-10 10h-16a10,10 0,0 1,-10 -10v-16a10,10 0,0 1,10 -10z"
+        android:strokeWidth="4"
+        android:strokeColor="#FFFFFFFF" />
+    <path
+        android:pathData="M54,45.5a8.5,8.5 0,1 1,0 17a8.5,8.5 0,1 1,0 -17z"
+        android:strokeWidth="4"
+        android:strokeColor="#FFFFFFFF" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M63.5,41.5a2.5,2.5 0,1 1,0 5a2.5,2.5 0,1 1,0 -5z" />
+
+    <!-- Contorno branco para o vermelho não se perder no degradê. -->
+    <path
+        android:pathData="M54,26a28,28 0,1 1,0 56a28,28 0,1 1,0 -56z M34.2,34.2L73.8,73.8"
+        android:strokeWidth="4.5"
+        android:strokeColor="#FFFFFFFF" />
+    <path
+        android:pathData="M54,26a28,28 0,1 1,0 56a28,28 0,1 1,0 -56z M34.2,34.2L73.8,73.8"
+        android:strokeWidth="2.5"
+        android:strokeColor="#FFE0242B" />
+</vector>

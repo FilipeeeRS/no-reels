@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Sem filtro de pacote de propósito: o serviço precisa saber quando o Instagram
+  sai da frente (outro app, aba de notificações, teclado) para tirar o overlay.
+-->
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accessibilityEventTypes="typeWindowStateChanged|typeWindowContentChanged|typeWindowsChanged|typeViewScrolled"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:accessibilityFlags="flagReportViewIds|flagRetrieveInteractiveWindows|flagIncludeNotImportantViews"
+    android:canRetrieveWindowContent="true"
+    android:canPerformGestures="true"
+    android:canTakeScreenshot="true"
+    android:description="@string/service_description"
+    android:notificationTimeout="20" />
