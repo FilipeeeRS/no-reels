@@ -11,6 +11,8 @@ object Prefs {
     const val ENABLED = "enabled"
     const val HIDE_REELS = "hide_reels"
     const val HIDE_SEARCH = "hide_search"
+    const val BLOCK_REELS = "block_reels"
+    const val BLOCK_SEARCH = "block_search"
     const val BLOCK_SHARED_REELS = "block_shared_reels"
     const val SKIP_STORY_ADS = "skip_story_ads"
     const val SKIP_REEL_ADS = "skip_reel_ads"
@@ -85,14 +87,15 @@ data class BarConfig(
                 Prefs.list(p.getString(Prefs.SEARCH_IDS, Prefs.DEFAULT_SEARCH_IDS)),
                 Prefs.list(p.getString(Prefs.SEARCH_DESCS, Prefs.DEFAULT_SEARCH_DESCS)),
             ),
-            hideReels = p.getBoolean(Prefs.HIDE_REELS, true),
-            hideSearch = p.getBoolean(Prefs.HIDE_SEARCH, true),
-            // Esconder o ícone e sair da tela andam juntos: sem o ícone, a tela também some.
-            blockReels = p.getBoolean(Prefs.HIDE_REELS, true),
-            blockSearch = p.getBoolean(Prefs.HIDE_SEARCH, true),
+            // Sair da tela sempre esconde o ícone também: não faz sentido mostrar uma aba que fecha.
+            hideReels = p.getBoolean(Prefs.HIDE_REELS, true) || p.getBoolean(Prefs.BLOCK_REELS, false),
+            hideSearch = p.getBoolean(Prefs.HIDE_SEARCH, true) || p.getBoolean(Prefs.BLOCK_SEARCH, false),
+            blockReels = p.getBoolean(Prefs.BLOCK_REELS, false),
+            blockSearch = p.getBoolean(Prefs.BLOCK_SEARCH, false),
             blockSharedReels = p.getBoolean(Prefs.BLOCK_SHARED_REELS, false),
             skipStoryAds = p.getBoolean(Prefs.SKIP_STORY_ADS, false),
             skipReelAds = p.getBoolean(Prefs.SKIP_REEL_ADS, false),
-            adLabels = Prefs.list(p.getString(Prefs.AD_LABELS, Prefs.DEFAULT_AD_LABELS)),        )
+            adLabels = Prefs.list(p.getString(Prefs.AD_LABELS, Prefs.DEFAULT_AD_LABELS)),
+        )
     }
 }

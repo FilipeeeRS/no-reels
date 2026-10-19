@@ -1,5 +1,6 @@
 package dev.semreels
 
+import android.app.ActionBar
 import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -10,6 +11,7 @@ import android.graphics.Typeface
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -31,6 +33,8 @@ class MainActivity : Activity() {
     private lateinit var enableButton: Button
     private lateinit var hideReels: Switch
     private lateinit var hideSearch: Switch
+    private lateinit var blockReels: Switch
+    private lateinit var blockSearch: Switch
     private lateinit var blockSharedReels: Switch
     private lateinit var skipStoryAds: Switch
     private lateinit var skipReelAds: Switch
@@ -48,25 +52,45 @@ class MainActivity : Activity() {
             setPadding(pad, pad, pad, pad)
         }
 
+        // Chave geral fica na barra do topo, logo depois do nome do app.
         master = Switch(this).apply {
-            textSize = 22f
-            setTypeface(typeface, Typeface.BOLD)
-            setPadding(0, dp(8), 0, dp(8))
+            setPadding(dp(12), 0, 0, 0)
             isChecked = prefs.getBoolean(Prefs.ENABLED, true)
             setOnCheckedChangeListener { _, on ->
                 prefs.edit().putBoolean(Prefs.ENABLED, on).apply()
                 refreshControls()
             }
-        }.also(col::addView)
+        }
+        actionBar?.apply {
+            setDisplayShowCustomEnabled(true)
+            setCustomView(master, ActionBar.LayoutParams(
+                ActionBar.LayoutParams.WRAP_CONTENT,
+                ActionBar.LayoutParams.WRAP_CONTENT,
+                Gravity.START or Gravity.CENTER_VERTICAL,
+            ))
+        }
         serviceStatus = note("Serviço de acessibilidade desligado.").also(col::addView)
         enableButton = button("Ativar nas configurações de acessibilidade") {
             startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
         }.also(col::addView)
 
+        section(col, "Esconde ícones da barra inferior")
+        hideReels = option(col, "Esconder ícone do Reels", Prefs.HIDE_REELS, true)
+        hideSearch = option(col, "Esconder ícone da Pesquisa", Prefs.HIDE_SEARCH, true)
+
         col.addView(divider())
-        section(col, "Reels e Pesquisa")
-        hideReels = option(col, "Esconder Reels", Prefs.HIDE_REELS, true)
-        hideSearch = option(col, "Esconder Pesquisa", Prefs.HIDE_SEARCH, true)
+        section(col, "Telas")
+        blockReels = option(col, "Sair da tela do Reels", Prefs.BLOCK_REELS, false)
+        blockSearch = option(col, "Sair da tela de Pesquisa", Prefs.BLOCK_SEARCH, false)
+        // Ligar "Sair da tela" liga e trava o "Esconder ícone" correspondente.
+        blockReels.setOnCheckedChangeListener { _, on ->
+            prefs.edit().putBoolean(Prefs.BLOCK_REELS, on).apply()
+            refreshControls()
+        }
+        blockSearch.setOnCheckedChangeListener { _, on ->
+            prefs.edit().putBoolean(Prefs.BLOCK_SEARCH, on).apply()
+            refreshControls()
+        }
         blockSharedReels = option(col, "Sair de Reels mandados por amigos", Prefs.BLOCK_SHARED_REELS, false)
 
         col.addView(divider())
@@ -127,11 +151,24 @@ class MainActivity : Activity() {
     private fun refreshControls() {
         val service = isServiceEnabled()
         val on = master.isChecked
-        master.text = if (on) "No Reels ativado" else "No Reels desativado"
         master.isEnabled = service
         serviceStatus.visibility = if (service) View.GONE else View.VISIBLE
         enableButton.visibility = if (service) View.GONE else View.VISIBLE
-        for (s in listOf(hideReels, hideSearch, blockSharedReels, skipStoryAds, skipReelAds)) s.isEnabled = service && on
+        for (s in listOf(hideReels, hideSearch, blockReels, blockSearch, blockSharedReels, skipStoryAds, skipReelAds)) {
+            s.isEnabled = service && on
+        }
+        lockIcon(hideReels, Prefs.HIDE_REELS, blockReels.isChecked)
+        lockIcon(hideSearch, Prefs.HIDE_SEARCH, blockSearch.isChecked)
+    }
+
+    // Com "Sair da tela" ligado, o ícone aparece marcado e não pode ser desmarcado.
+    private fun lockIcon(icon: Switch, key: String, locked: Boolean) {
+        if (locked) {
+            icon.isChecked = true
+            icon.isEnabled = false
+        } else {
+            icon.isChecked = prefs.getBoolean(key, true)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
