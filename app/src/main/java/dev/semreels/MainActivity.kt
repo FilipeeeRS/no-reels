@@ -7,8 +7,11 @@ import android.content.ComponentName
 import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Typeface
+import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -18,17 +21,16 @@ import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 
-class MainActivity : Activity(), SharedPreferences.OnSharedPreferenceChangeListener {
+private const val REPO_URL = "https://github.com/FilipeeeRS/no-reels"
+
+class MainActivity : Activity() {
 
     private lateinit var prefs: SharedPreferences
     private lateinit var master: Switch
     private lateinit var serviceStatus: TextView
     private lateinit var enableButton: Button
-    private lateinit var lastStatus: TextView
     private lateinit var hideReels: Switch
     private lateinit var hideSearch: Switch
-    private lateinit var blockReels: Switch
-    private lateinit var blockSearch: Switch
     private lateinit var blockSharedReels: Switch
     private lateinit var skipStoryAds: Switch
     private lateinit var skipReelAds: Switch
@@ -60,17 +62,11 @@ class MainActivity : Activity(), SharedPreferences.OnSharedPreferenceChangeListe
         enableButton = button("Ativar nas configurações de acessibilidade") {
             startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
         }.also(col::addView)
-        lastStatus = note("").also(col::addView)
 
         col.addView(divider())
-        section(col, "Esconde ícones da barra inferior")
-        hideReels = option(col, "Esconder ícone do Reels", Prefs.HIDE_REELS, true)
-        hideSearch = option(col, "Esconder ícone da Pesquisa", Prefs.HIDE_SEARCH, true)
-
-        col.addView(divider())
-        section(col, "Telas")
-        blockReels = option(col, "Sair da tela do Reels", Prefs.BLOCK_REELS, false)
-        blockSearch = option(col, "Sair da tela de Pesquisa", Prefs.BLOCK_SEARCH, false)
+        section(col, "Reels e Pesquisa")
+        hideReels = option(col, "Esconder Reels", Prefs.HIDE_REELS, true)
+        hideSearch = option(col, "Esconder Pesquisa", Prefs.HIDE_SEARCH, true)
         blockSharedReels = option(col, "Sair de Reels mandados por amigos", Prefs.BLOCK_SHARED_REELS, false)
 
         col.addView(divider())
@@ -104,18 +100,17 @@ class MainActivity : Activity(), SharedPreferences.OnSharedPreferenceChangeListe
         textField(advanced, "Descrição da Pesquisa", Prefs.SEARCH_DESCS, Prefs.DEFAULT_SEARCH_DESCS)
         textField(advanced, "Rótulos de anúncio", Prefs.AD_LABELS, Prefs.DEFAULT_AD_LABELS)
 
-        val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        row.addView(button("Salvar") { save() })
-        row.addView(button("Padrões") { restoreDefaults() })
-        advanced.addView(row)
-
-        val dumpRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        dumpRow.addView(button("Gerar diagnóstico") {
-            prefs.edit().putBoolean(Prefs.DUMP_REQUESTED, true).apply()
-            toast("Abra o Instagram na tela inicial. O arquivo será salvo automaticamente.")
-        })
-        dumpRow.addView(button("Copiar") { copyLastDump() })
-        advanced.addView(dumpRow)
+        advanced.addView(buttonRow(
+            button("Salvar") { save() },
+            button("Padrões") { restoreDefaults() },
+        ))
+        advanced.addView(buttonRow(
+            button("Gerar diagnóstico") {
+                prefs.edit().putBoolean(Prefs.DUMP_REQUESTED, true).apply()
+                toast("Abra o Instagram na tela inicial. O arquivo será salvo automaticamente.")
+            },
+            button("Copiar") { copyLastDump() },
+        ))
 
         setContentView(ScrollView(this).apply {
             fitsSystemWindows = true
@@ -126,9 +121,7 @@ class MainActivity : Activity(), SharedPreferences.OnSharedPreferenceChangeListe
 
     override fun onResume() {
         super.onResume()
-        prefs.registerOnSharedPreferenceChangeListener(this)
         refreshControls()
-        showLastStatus()
     }
 
     private fun refreshControls() {
@@ -138,20 +131,19 @@ class MainActivity : Activity(), SharedPreferences.OnSharedPreferenceChangeListe
         master.isEnabled = service
         serviceStatus.visibility = if (service) View.GONE else View.VISIBLE
         enableButton.visibility = if (service) View.GONE else View.VISIBLE
-        for (s in listOf(hideReels, hideSearch, blockReels, blockSearch, blockSharedReels, skipStoryAds, skipReelAds)) s.isEnabled = service && on
+        for (s in listOf(hideReels, hideSearch, blockSharedReels, skipStoryAds, skipReelAds)) s.isEnabled = service && on
     }
 
-    override fun onPause() {
-        prefs.unregisterOnSharedPreferenceChangeListener(this)
-        super.onPause()
-    }
-
-    override fun onSharedPreferenceChanged(p: SharedPreferences, key: String?) {
-        if (key == Prefs.LAST_STATUS) showLastStatus()
-    }
-
-    private fun showLastStatus() {
-        lastStatus.text = prefs.getString(Prefs.LAST_STATUS, null) ?: ""
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menu.add("GitHub").apply {
+            setIcon(R.drawable.ic_github)
+            setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
+            setOnMenuItemClickListener {
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(REPO_URL)))
+                true
+            }
+        }
+        return true
     }
 
     private fun loadSelectors() {
@@ -233,6 +225,17 @@ class MainActivity : Activity(), SharedPreferences.OnSharedPreferenceChangeListe
     private fun note(text: String) = TextView(this).apply {
         this.text = text
         alpha = 0.7f
+    }
+
+    // Botões dividindo a largura, com respiro entre eles e acima da linha.
+    private fun buttonRow(vararg buttons: Button) = LinearLayout(this).apply {
+        orientation = LinearLayout.HORIZONTAL
+        setPadding(0, dp(12), 0, 0)
+        buttons.forEachIndexed { i, b ->
+            addView(b, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
+                if (i > 0) marginStart = dp(12)
+            })
+        }
     }
 
     private fun button(text: String, onClick: (View) -> Unit) = Button(this).apply {
