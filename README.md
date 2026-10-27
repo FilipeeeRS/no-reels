@@ -1,10 +1,10 @@
 # No Reels
 
-App Android pessoal que tira "Reels", "Pesquisa" e anúncios do Instagram via serviço de acessibilidade. Sem root.
+Personal Android app that removes Reels, Explore and ads from Instagram using an accessibility service. No root required.
 
-## Como usar
+## How to use
 
-Requer Android 14+ com depuração ativa e JDK 17 para compilar.
+Requires Android 14+ with USB debugging enabled and JDK 17 to build.
 
 ```powershell
 $env:JAVA_HOME = "C:\Program Files\Java\jdk-17"
@@ -12,8 +12,8 @@ $env:JAVA_HOME = "C:\Program Files\Java\jdk-17"
 adb install -r app\build\outputs\apk\debug\app-debug.apk
 ```
 
-Depois ative em **Configurações > Acessibilidade > No Reels**.
+Then enable it under **Settings > Accessibility > No Reels**.
 
-## Se parar de funcionar
+## If it stops working
 
-Uma atualização do Instagram pode mudar os IDs que o app usa. Gere um diagnóstico em **Avançado** e ajuste os IDs lá mesmo.
+An Instagram update may change the IDs the app relies on. Generate a diagnostic under **Advanced** and adjust the IDs right there.
